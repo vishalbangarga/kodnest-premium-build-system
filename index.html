@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KodNest Premium Build System</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <!-- Top Bar -->
+      <header class="top-bar">
+        <div class="top-bar__left">
+          <span class="top-bar__project-name">KodNest Premium Build System</span>
+        </div>
+        <div class="top-bar__center">
+          <span class="top-bar__progress">Step 1 / 5</span>
+        </div>
+        <div class="top-bar__right">
+          <span class="status-badge status-badge--in-progress">In Progress</span>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="main-layout">
+        <!-- Context Header -->
+        <section class="context-header">
+          <h1 class="context-header__title">
+            Define your build context
+          </h1>
+          <p class="context-header__subtitle">
+            Set up a calm, predictable workspace before adding any product
+            behavior.
+          </p>
+        </section>
+
+        <!-- Primary + Secondary Columns -->
+        <section class="workspace-layout">
+          <!-- Primary Workspace (70%) -->
+          <section class="primary-workspace">
+            <article class="card">
+              <header class="card__header">
+                <h2 class="card__title">Workspace structure</h2>
+                <p class="card__description">
+                  This area is where users interact with the core of the
+                  product. Cards and inputs remain spacious and predictable.
+                </p>
+              </header>
+              <div class="card__body">
+                <div class="field-group">
+                  <label class="field-label" for="project-name">
+                    Project name
+                  </label>
+                  <input
+                    id="project-name"
+                    class="text-input"
+                    type="text"
+                    placeholder="e.g. Production build pipeline"
+                  />
+                </div>
+
+                <div class="field-group">
+                  <label class="field-label" for="build-summary">
+                    Summary
+                  </label>
+                  <textarea
+                    id="build-summary"
+                    class="text-area"
+                    rows="4"
+                    placeholder="Short, direct description of what this build configuration represents."
+                  ></textarea>
+                  <p class="field-helper">
+                    Keep this text short and factual. It helps others
+                    understand the intent of this build.
+                  </p>
+                </div>
+
+                <div class="field-group field-group--inline">
+                  <div class="field-group__item">
+                    <label class="field-label" for="environment">
+                      Environment
+                    </label>
+                    <input
+                      id="environment"
+                      class="text-input"
+                      type="text"
+                      placeholder="e.g. Staging"
+                    />
+                  </div>
+                  <div class="field-group__item">
+                    <label class="field-label" for="region">
+                      Region
+                    </label>
+                    <input
+                      id="region"
+                      class="text-input"
+                      type="text"
+                      placeholder="e.g. EU-West"
+                    />
+                  </div>
+                </div>
+
+                <div class="card__actions">
+                  <button class="btn btn--primary" type="button">
+                    Continue
+                  </button>
+                  <button class="btn btn--secondary" type="button">
+                    Save as draft
+                  </button>
+                </div>
+              </div>
+            </article>
+
+            <article class="card">
+              <header class="card__header">
+                <h2 class="card__title">Configuration overview</h2>
+                <p class="card__description">
+                  A calm snapshot of the configuration layout, without adding
+                  behavior yet.
+                </p>
+              </header>
+              <div class="card__body card__body--columns">
+                <div class="summary-section">
+                  <h3 class="summary-section__title">Inputs</h3>
+                  <p class="summary-section__text">
+                    Inputs are simple, clearly labeled, and grouped with
+                    balanced spacing. No hidden fields or surprises.
+                  </p>
+                </div>
+                <div class="summary-section">
+                  <h3 class="summary-section__title">Outputs</h3>
+                  <p class="summary-section__text">
+                    Outputs appear where users expect to find them. Layout
+                    stays stable as features grow.
+                  </p>
+                </div>
+              </div>
+            </article>
+          </section>
+
+          <!-- Secondary Panel (30%) -->
+          <aside class="secondary-panel">
+            <section class="secondary-panel__section">
+              <h2 class="secondary-panel__title">This step</h2>
+              <p class="secondary-panel__body">
+                Use this layout to keep every build step clear and measurable.
+                Each page shares the same structure so users never have to
+                re-learn the interface.
+              </p>
+            </section>
+
+            <section class="secondary-panel__section">
+              <h3 class="secondary-panel__subtitle">Prompt for this step</h3>
+              <div class="prompt-box">
+                <p class="prompt-box__text">
+                  Configure a calm, predictable workspace for this build step.
+                  Do not add business logic yet. Focus only on structure,
+                  labels, spacing, and states.
+                </p>
+              </div>
+              <div class="secondary-panel__actions">
+                <button class="btn btn--secondary" type="button">
+                  Copy
+                </button>
+                <button class="btn btn--secondary" type="button">
+                  Build in Lovable
+                </button>
+              </div>
+            </section>
+
+            <section class="secondary-panel__section">
+              <h3 class="secondary-panel__subtitle">Outcome</h3>
+              <div class="secondary-panel__actions secondary-panel__actions--stacked">
+                <button class="btn btn--secondary" type="button">
+                  It Worked
+                </button>
+                <button class="btn btn--secondary" type="button">
+                  Error
+                </button>
+                <button class="btn btn--secondary" type="button">
+                  Add Screenshot
+                </button>
+              </div>
+            </section>
+          </aside>
+        </section>
+      </main>
+
+      <!-- Proof Footer -->
+      <footer class="proof-footer">
+        <div class="proof-footer__content">
+          <div class="proof-item">
+            <label class="proof-item__label">
+              <input class="proof-item__checkbox" type="checkbox" />
+              <span class="proof-item__title">UI Built</span>
+            </label>
+            <input
+              class="text-input text-input--compact"
+              type="text"
+              placeholder="Link or note confirming UI layout."
+            />
+          </div>
+
+          <div class="proof-item">
+            <label class="proof-item__label">
+              <input class="proof-item__checkbox" type="checkbox" />
+              <span class="proof-item__title">Logic Working</span>
+            </label>
+            <input
+              class="text-input text-input--compact"
+              type="text"
+              placeholder="Evidence that logic will be wired later."
+            />
+          </div>
+
+          <div class="proof-item">
+            <label class="proof-item__label">
+              <input class="proof-item__checkbox" type="checkbox" />
+              <span class="proof-item__title">Test Passed</span>
+            </label>
+            <input
+              class="text-input text-input--compact"
+              type="text"
+              placeholder="Note where tests will live."
+            />
+          </div>
+
+          <div class="proof-item">
+            <label class="proof-item__label">
+              <input class="proof-item__checkbox" type="checkbox" />
+              <span class="proof-item__title">Deployed</span>
+            </label>
+            <input
+              class="text-input text-input--compact"
+              type="text"
+              placeholder="Destination for this build."
+            />
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
+
