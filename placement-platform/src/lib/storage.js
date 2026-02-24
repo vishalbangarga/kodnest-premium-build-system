@@ -51,3 +51,18 @@ export function findHistoryEntryById(id) {
   return history.find((e) => e && e.id === id) || null;
 }
 
+export function updateHistoryEntry(updated) {
+  if (!updated || !updated.id) return;
+  const history = loadHistory();
+  const next = history.map((entry) =>
+    entry && entry.id === updated.id ? updated : entry
+  );
+  saveHistory(next);
+
+  const latest = loadLatest();
+  if (latest && latest.id === updated.id) {
+    saveLatest(updated);
+  }
+}
+
+
