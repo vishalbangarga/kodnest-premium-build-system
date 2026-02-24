@@ -6,6 +6,7 @@ import Practice from "./pages/Practice.jsx";
 import Assessments from "./pages/Assessments.jsx";
 import Resources from "./pages/Resources.jsx";
 import Profile from "./pages/Profile.jsx";
+import Results from "./pages/Results.jsx";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="assessments" element={<Assessments />} />
           <Route path="resources" element={<Resources />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="results" element={<Results />} />
         </Route>
       </Routes>
     </BrowserRouter>
