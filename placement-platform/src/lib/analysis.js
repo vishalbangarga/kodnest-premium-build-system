@@ -230,7 +230,6 @@ export function buildInterviewQuestions(extractedSkills) {
   const questions = [];
 
   const pushUnique = (q) => {
-    if (questions.length >= 10) return;
     if (!questions.includes(q)) questions.push(q);
   };
 
@@ -258,11 +257,29 @@ export function buildInterviewQuestions(extractedSkills) {
   if (hasSkill(extractedSkills, "OS")) pushUnique("Processes vs threads: what’s the difference and where does it matter?");
   if (hasSkill(extractedSkills, "Networks")) pushUnique("What happens when you type a URL in the browser (high-level flow)?");
 
+  // Generic questions used to top up the list to 10.
+  const genericPool = [
+    "Tell me about a project you built: architecture, tradeoffs, and biggest learning.",
+    "How do you approach debugging when you don’t know the cause?",
+    "What is your strategy to handle edge cases and constraints in coding problems?",
+    "Explain one concept you learned recently and how you applied it.",
+    "Describe a time you had to quickly learn a new technology or concept for a project.",
+    "How do you make sure your code is readable and maintainable for others?",
+    "Talk about a situation where you disagreed with someone on a technical decision. What happened?",
+    "How do you balance writing code quickly with writing code that is robust?",
+    "What’s one mistake you made in a past project and what you learned from it?",
+    "When you get stuck on a problem, what is your step-by-step approach to get unstuck?"
+  ];
+
+  for (const q of genericPool) {
+    if (questions.length >= 10) break;
+    pushUnique(q);
+  }
+
+  // Safety: if for some reason we still have fewer than 10 (e.g., genericPool shortened),
+  // allow duplicates of the first generic question to pad the list without hanging.
   while (questions.length < 10) {
-    pushUnique("Tell me about a project you built: architecture, tradeoffs, and biggest learning.");
-    pushUnique("How do you approach debugging when you don’t know the cause?");
-    pushUnique("What is your strategy to handle edge cases and constraints in coding problems?");
-    pushUnique("Explain one concept you learned recently and how you applied it.");
+    questions.push(genericPool[0]);
   }
 
   return questions.slice(0, 10);
