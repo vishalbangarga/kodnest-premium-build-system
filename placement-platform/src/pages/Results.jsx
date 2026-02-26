@@ -46,8 +46,17 @@ function computeLiveScore(baseScore, skillConfidenceMap) {
 
 function buildPlanText(plan) {
   const lines = ["7-day Plan", ""];
-  Object.entries(plan || {}).forEach(([day, tasks]) => {
-    lines.push(`${day}:`);
+  const entries = Array.isArray(plan)
+    ? plan
+    : Object.entries(plan || {}).map(([day, tasks]) => ({
+        day,
+        tasks: tasks || []
+      }));
+
+  entries.forEach((entry) => {
+    const dayLabel = entry.day || "";
+    const tasks = entry.tasks || [];
+    lines.push(`${dayLabel}:`);
     tasks.forEach((task) => {
       lines.push(`- ${task}`);
     });
@@ -58,8 +67,17 @@ function buildPlanText(plan) {
 
 function buildChecklistText(checklist) {
   const lines = ["Round-wise Preparation Checklist", ""];
-  Object.entries(checklist || {}).forEach(([round, items]) => {
-    lines.push(`${round}:`);
+  const entries = Array.isArray(checklist)
+    ? checklist
+    : Object.entries(checklist || {}).map(([roundTitle, items]) => ({
+        roundTitle,
+        items: items || []
+      }));
+
+  entries.forEach((entry) => {
+    const roundTitle = entry.roundTitle || "";
+    const items = entry.items || [];
+    lines.push(`${roundTitle}:`);
     items.forEach((item) => {
       lines.push(`- ${item}`);
     });
@@ -77,14 +95,21 @@ function buildQuestionsText(questions) {
 }
 
 function buildFullExport(entry) {
-  const { company, role, readinessScore, plan, checklist, questions, jdText } =
-    entry;
+  const {
+    company,
+    role,
+    finalScore,
+    plan7Days,
+    checklist,
+    questions,
+    jdText
+  } = entry;
   const parts = [];
   parts.push(`Company: ${company}`);
   parts.push(`Role: ${role}`);
-  parts.push(`Readiness Score: ${readinessScore ?? 0}/100`);
+  parts.push(`Readiness Score: ${finalScore ?? 0}/100`);
   parts.push("");
-  parts.push(buildPlanText(plan));
+  parts.push(buildPlanText(plan7Days || entry.plan || {}));
   parts.push("");
   parts.push(buildChecklistText(checklist));
   parts.push("");
@@ -114,14 +139,6 @@ function Results() {
     }
     if (resolved && resolved.id !== entryId) {
       const updated = { ...resolved };
-
-      if (
-        typeof updated.baseReadinessScore !== "number" &&
-        typeof updated.readinessScore === "number"
-      ) {
-        updated.baseReadinessScore = updated.readinessScore;
-      }
-
       const intel = buildCompanyIntel(
         updated.company,
         updated.extractedSkills || {}
@@ -144,7 +161,9 @@ function Results() {
       );
       setSkillConfidenceMap(initialMap);
       const base =
-        typeof updated.baseReadinessScore === "number"
+        typeof updated.baseScore === "number"
+          ? updated.baseScore
+          : typeof updated.baseReadinessScore === "number"
           ? updated.baseReadinessScore
           : typeof updated.readinessScore === "number"
           ? updated.readinessScore
@@ -187,7 +206,7 @@ function Results() {
     jdText,
     extractedSkills,
     checklist,
-    plan,
+    plan7Days,
     questions,
     companyIntel,
     roundMapping
@@ -199,11 +218,15 @@ function Results() {
       const nextValue = current === "know" ? "practice" : "know";
       const nextMap = { ...prev, [skill]: nextValue };
 
+      const newFinalScore = computeLiveScore(baseScore, nextMap);
+
       const updatedEntry = {
         ...entry,
         skillConfidenceMap: nextMap,
-        baseReadinessScore: baseScore,
-        readinessScore: computeLiveScore(baseScore, nextMap)
+        baseScore,
+        finalScore: newFinalScore,
+        updatedAt: new Date().toISOString(),
+        readinessScore: newFinalScore
       };
       setEntry(updatedEntry);
       updateHistoryEntry(updatedEntry);
@@ -467,13 +490,19 @@ function Results() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {Object.entries(checklist || {}).map(([round, items]) => (
-              <div key={round} className="space-y-1.5">
+            {(Array.isArray(checklist)
+              ? checklist
+              : Object.entries(checklist || {}).map(([roundTitle, items]) => ({
+                  roundTitle,
+                  items: items || []
+                }))
+            ).map((entry) => (
+              <div key={entry.roundTitle} className="space-y-1.5">
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
-                  {round}
+                  {entry.roundTitle}
                 </p>
                 <ul className="list-disc list-outside space-y-1 pl-4 text-xs text-slate-200">
-                  {items.map((item) => (
+                  {entry.items.map((item) => (
                     <li key={item}>{item}</li>
                   ))}
                 </ul>
@@ -491,16 +520,22 @@ function Results() {
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 md:grid-cols-2">
-            {Object.entries(plan || {}).map(([day, tasks]) => (
+            {(Array.isArray(plan7Days)
+              ? plan7Days
+              : Object.entries(plan || {}).map(([day, tasks]) => ({
+                  day,
+                  tasks: tasks || []
+                }))
+            ).map((entry) => (
               <div
-                key={day}
+                key={entry.day}
                 className="rounded-md border border-slate-800 bg-slate-900/60 px-4 py-3"
               >
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400 mb-1.5">
-                  {day}
+                  {entry.day}
                 </p>
                 <ul className="list-disc list-outside space-y-1 pl-4 text-xs text-slate-200">
-                  {tasks.map((task) => (
+                  {entry.tasks.map((task) => (
                     <li key={task}>{task}</li>
                   ))}
                 </ul>

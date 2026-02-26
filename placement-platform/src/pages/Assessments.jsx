@@ -16,12 +16,25 @@ function Assessments() {
   const [role, setRole] = useState("");
   const [jdText, setJdText] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [jdError, setJdError] = useState("");
+  const [jdWarning, setJdWarning] = useState("");
 
   const handleAnalyze = () => {
     const trimmedText = jdText.trim();
     if (!trimmedText) {
+      setJdError("Job description is required.");
+      setJdWarning("");
       return;
     }
+
+    if (trimmedText.length < 200) {
+      setJdWarning(
+        "This JD is too short to analyze deeply. Paste full JD for better output."
+      );
+    } else {
+      setJdWarning("");
+    }
+    setJdError("");
 
     setIsAnalyzing(true);
     try {
@@ -29,11 +42,14 @@ function Assessments() {
       const entry = {
         id: createId(),
         createdAt: new Date().toISOString(),
-        company: company.trim() || "Unknown company",
-        role: role.trim() || "Role not specified",
+        company: company.trim() || "",
+        role: role.trim() || "",
         jdText: trimmedText,
         ...analysis,
-        baseReadinessScore: analysis.readinessScore
+        baseScore: analysis.readinessScore,
+        finalScore: analysis.readinessScore,
+        skillConfidenceMap: {},
+        updatedAt: new Date().toISOString()
       };
 
       addHistoryEntry(entry);
@@ -93,11 +109,33 @@ function Assessments() {
             </label>
             <textarea
               value={jdText}
-              onChange={(e) => setJdText(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setJdText(value);
+                  const trimmed = value.trim();
+                  if (!trimmed) {
+                    setJdError("");
+                    setJdWarning("");
+                  } else if (trimmed.length < 200) {
+                    setJdError("");
+                    setJdWarning(
+                      "This JD is too short to analyze deeply. Paste full JD for better output."
+                    );
+                  } else {
+                    setJdError("");
+                    setJdWarning("");
+                  }
+                }}
               placeholder="Paste the full JD here. Keywords like React, SQL, DSA, AWS help tune the plan."
               rows={10}
               className="w-full rounded-md border border-slate-700 bg-slate-900/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-primary focus:outline-none focus:ring-0 resize-y"
             />
+            {jdError && (
+              <p className="text-[11px] text-red-400">{jdError}</p>
+            )}
+            {!jdError && jdWarning && (
+              <p className="text-[11px] text-amber-300">{jdWarning}</p>
+            )}
             <p className="text-[11px] text-slate-500">
               No data leaves your browser. Each analysis is saved locally so you
               can revisit it from the history view.

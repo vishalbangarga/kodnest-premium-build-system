@@ -7,14 +7,17 @@ import {
   CardDescription,
   CardContent
 } from "../components/ui/card.jsx";
-import { loadHistory } from "../lib/storage.js";
+import { loadHistory, getHistoryWarning } from "../lib/storage.js";
 
 function Resources() {
   const navigate = useNavigate();
   const [history, setHistory] = useState([]);
+  const [hasCorrupt, setHasCorrupt] = useState(false);
 
   useEffect(() => {
-    setHistory(loadHistory());
+    const list = loadHistory();
+    setHistory(list);
+    setHasCorrupt(getHistoryWarning() === "corrupt");
   }, []);
 
   return (
@@ -26,6 +29,12 @@ function Resources() {
           revisit skills, plans, and questions.
         </p>
       </div>
+
+      {hasCorrupt && (
+        <p className="text-xs text-amber-300">
+          One saved entry couldn't be loaded. Create a new analysis.
+        </p>
+      )}
 
       <Card>
         <CardHeader>

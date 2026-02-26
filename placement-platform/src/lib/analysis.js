@@ -92,11 +92,7 @@ export function extractSkillsFromJD(jdText) {
   }
 
   const hasAny = Object.keys(grouped).length > 0;
-  if (!hasAny) {
-    return { "General fresher stack": ["DSA", "OOP", "SQL", "Projects", "Communication"] };
-  }
-
-  return grouped;
+  return hasAny ? grouped : {};
 }
 
 function hasSkill(extractedSkills, label) {
