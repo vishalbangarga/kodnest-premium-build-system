@@ -1,0 +1,312 @@
+/* rb-styles.css - Premium Build System Layout for AI Resume Builder */
+
+.rb-layout {
+  /* Colors */
+  --color-bg: #f7f6f3;
+  --color-text: #111111;
+  --color-accent: #8b0000;
+  --color-success: #4f6f52;
+  --color-warning: #c58b2b;
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+
+  /* Spacing scale */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 40px;
+  --space-5: 64px;
+
+  /* Typography */
+  --font-serif: Georgia, "Times New Roman", serif;
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.rb-layout * {
+  box-sizing: border-box;
+}
+
+/* Top Bar */
+.rb-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-3);
+  height: 64px;
+  border-bottom: 1px solid rgba(17, 17, 17, 0.08);
+  background-color: var(--color-bg);
+}
+
+.rb-top-bar__left,
+.rb-top-bar__center,
+.rb-top-bar__right {
+  display: flex;
+  align-items: center;
+}
+
+.rb-top-bar__center { flex: 0 0 auto; }
+.rb-top-bar__left, .rb-top-bar__right { flex: 1 1 0; }
+.rb-top-bar__left { justify-content: flex-start; }
+.rb-top-bar__right { justify-content: flex-end; }
+
+.rb-top-bar__project-name {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.rb-top-bar__progress {
+  font-size: 14px;
+  color: rgba(17, 17, 17, 0.72);
+}
+
+.rb-status-badge {
+  padding: 8px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(17, 17, 17, 0.24);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.rb-status-badge--in-progress {
+  background-color: rgba(139, 0, 0, 0.08);
+  color: var(--color-accent);
+  border-color: rgba(139, 0, 0, 0.32);
+}
+
+.rb-status-badge--not-started {
+  background-color: transparent;
+  color: rgba(17, 17, 17, 0.72);
+  border-color: rgba(17, 17, 17, 0.24);
+}
+
+.rb-status-badge--shipped {
+  background-color: rgba(79, 111, 82, 0.12);
+  color: var(--color-success);
+  border-color: rgba(79, 111, 82, 0.4);
+}
+
+/* Main Layout */
+.rb-main-layout {
+  flex: 1 0 auto;
+  padding: var(--space-4) var(--space-3) var(--space-5);
+}
+
+.rb-context-header {
+  max-width: 720px;
+  padding-bottom: var(--space-3);
+}
+
+.rb-context-header__title {
+  margin: 0 0 var(--space-1) 0;
+  font-family: var(--font-serif);
+  font-size: 36px;
+  line-height: 1.3;
+  letter-spacing: 0.02em;
+}
+
+.rb-context-header__subtitle {
+  margin: 0;
+  max-width: 720px;
+  font-size: 16px;
+  color: rgba(17, 17, 17, 0.72);
+}
+
+.rb-workspace-layout {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+
+.rb-primary-workspace {
+  flex: 0 0 70%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.rb-secondary-panel {
+  flex: 0 0 30%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Cards */
+.rb-card {
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(17, 17, 17, 0.1);
+  background-color: var(--color-bg);
+  padding: var(--space-3);
+}
+
+.rb-card__header {
+  margin-bottom: var(--space-2);
+}
+
+.rb-card__title {
+  margin: 0 0 var(--space-1) 0;
+  font-family: var(--font-serif);
+  font-size: 24px;
+  line-height: 1.4;
+}
+
+.rb-card__description {
+  margin: 0;
+  font-size: 14px;
+  color: rgba(17, 17, 17, 0.72);
+  max-width: 720px;
+}
+
+.rb-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Fields */
+.rb-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.rb-field-label {
+  font-size: 14px;
+  color: rgba(17, 17, 17, 0.72);
+  font-weight: 500;
+}
+
+.rb-text-input,
+.rb-text-area {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(17, 17, 17, 0.18);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  outline: none;
+  transition: all 180ms ease-in-out;
+}
+
+.rb-text-input:focus,
+.rb-text-area:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px rgba(139, 0, 0, 0.24);
+}
+
+/* Buttons */
+.rb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px var(--space-2);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid transparent;
+  background-color: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all 180ms ease-in-out;
+}
+
+.rb-btn--primary {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-bg);
+}
+
+.rb-btn--primary:hover {
+  background-color: #9c1111;
+}
+
+.rb-btn--primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.rb-btn--secondary {
+  border-color: rgba(17, 17, 17, 0.24);
+  color: var(--color-text);
+}
+
+.rb-btn--secondary:hover {
+  background-color: rgba(17, 17, 17, 0.03);
+}
+
+/* Secondary Panel Specifics */
+.rb-secondary-panel__section {
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(17, 17, 17, 0.1);
+  padding: var(--space-3);
+  background-color: var(--color-bg);
+}
+
+.rb-secondary-panel__title {
+  margin: 0 0 var(--space-1) 0;
+  font-family: var(--font-serif);
+  font-size: 20px;
+}
+
+.rb-prompt-box {
+  margin-bottom: var(--space-2);
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(17, 17, 17, 0.12);
+  background-color: rgba(17, 17, 17, 0.02);
+  font-size: 14px;
+}
+
+/* Proof Footer */
+.rb-proof-footer {
+  flex: 0 0 auto;
+  border-top: 1px solid rgba(17, 17, 17, 0.12);
+  background-color: var(--color-bg);
+  padding: var(--space-2) var(--space-3);
+}
+
+.rb-proof-footer__content {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.rb-proof-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.rb-proof-item__label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: 14px;
+}
+
+.rb-proof-item__checkbox {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  /* Make sure checkbox looks okay without tailwind defaults overriding */
+}
+
+@media (max-width: 1024px) {
+  .rb-workspace-layout { flex-direction: column; }
+  .rb-primary-workspace, .rb-secondary-panel { flex: 1 1 100%; }
+  .rb-proof-footer__content { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
