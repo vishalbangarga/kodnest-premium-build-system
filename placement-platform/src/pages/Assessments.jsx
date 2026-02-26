@@ -32,7 +32,8 @@ function Assessments() {
         company: company.trim() || "Unknown company",
         role: role.trim() || "Role not specified",
         jdText: trimmedText,
-        ...analysis
+        ...analysis,
+        baseReadinessScore: analysis.readinessScore
       };
 
       addHistoryEntry(entry);

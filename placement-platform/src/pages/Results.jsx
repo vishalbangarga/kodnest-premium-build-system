@@ -12,6 +12,10 @@ import {
   loadLatest,
   updateHistoryEntry
 } from "../lib/storage.js";
+import {
+  buildCompanyIntel,
+  buildRoundMapping
+} from "../lib/analysis.js";
 
 function useQuery() {
   const { search } = useLocation();
@@ -109,18 +113,41 @@ function Results() {
       resolved = loadLatest();
     }
     if (resolved && resolved.id !== entryId) {
-      setEntry(resolved);
-      setEntryId(resolved.id);
+      const updated = { ...resolved };
+
+      if (
+        typeof updated.baseReadinessScore !== "number" &&
+        typeof updated.readinessScore === "number"
+      ) {
+        updated.baseReadinessScore = updated.readinessScore;
+      }
+
+      const intel = buildCompanyIntel(
+        updated.company,
+        updated.extractedSkills || {}
+      );
+      if (intel) {
+        updated.companyIntel = intel;
+        updated.roundMapping = buildRoundMapping(
+          intel,
+          updated.extractedSkills || {}
+        );
+      }
+
+      updateHistoryEntry(updated);
+
+      setEntry(updated);
+      setEntryId(updated.id);
       const initialMap = buildInitialSkillMap(
-        resolved.extractedSkills || {},
-        resolved.skillConfidenceMap || {}
+        updated.extractedSkills || {},
+        updated.skillConfidenceMap || {}
       );
       setSkillConfidenceMap(initialMap);
       const base =
-        typeof resolved.baseReadinessScore === "number"
-          ? resolved.baseReadinessScore
-          : typeof resolved.readinessScore === "number"
-          ? resolved.readinessScore
+        typeof updated.baseReadinessScore === "number"
+          ? updated.baseReadinessScore
+          : typeof updated.readinessScore === "number"
+          ? updated.readinessScore
           : 0;
       setBaseScore(base);
     }
@@ -154,8 +181,17 @@ function Results() {
     );
   }
 
-  const { company, role, jdText, extractedSkills, checklist, plan, questions } =
-    entry;
+  const {
+    company,
+    role,
+    jdText,
+    extractedSkills,
+    checklist,
+    plan,
+    questions,
+    companyIntel,
+    roundMapping
+  } = entry;
 
   const handleToggleSkill = (skill) => {
     setSkillConfidenceMap((prev) => {
@@ -283,6 +319,100 @@ function Results() {
           </div>
         </CardContent>
       </Card>
+
+      {companyIntel && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Company intel</CardTitle>
+            <CardDescription>
+              Heuristic view of this company and what their hiring bar tends to
+              emphasize.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-3 md:grid-cols-3">
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.16em] text-slate-400">
+                  Company
+                </p>
+                <p className="text-sm font-semibold text-white mt-0.5">
+                  {companyIntel.name}
+                </p>
+              </div>
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.16em] text-slate-400">
+                  Industry
+                </p>
+                <p className="text-sm text-slate-200 mt-0.5">
+                  {companyIntel.industry}
+                </p>
+              </div>
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.16em] text-slate-400">
+                  Estimated size
+                </p>
+                <p className="text-sm text-slate-200 mt-0.5">
+                  {companyIntel.sizeLabel}
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <p className="text-[11px] uppercase tracking-[0.16em] text-slate-400">
+                Typical hiring focus
+              </p>
+              <ul className="list-disc list-outside space-y-1 pl-4 text-xs text-slate-200">
+                {(companyIntel.typicalFocus || []).map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+
+            <p className="text-[11px] text-slate-500">
+              Demo Mode: Company intel generated heuristically.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {companyIntel && Array.isArray(roundMapping) && roundMapping.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Round mapping</CardTitle>
+            <CardDescription>
+              Likely interview flow for{" "}
+              <span className="font-semibold text-slate-100">
+                {companyIntel.name}
+              </span>{" "}
+              based on role, stack, and company size.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="relative">
+              <div className="absolute left-2 top-1 bottom-1 border-l border-slate-700" />
+              <div className="space-y-4">
+                {roundMapping.map((round, idx) => (
+                  <div key={`${idx}-${round.title}`} className="relative pl-8">
+                    <div className="absolute left-0 top-1 w-3 h-3 rounded-full bg-primary border border-slate-950" />
+                    <p className="text-[11px] uppercase tracking-[0.16em] text-slate-400">
+                      Round {idx + 1}
+                    </p>
+                    <p className="text-sm font-semibold text-white">
+                      {round.title}
+                    </p>
+                    <p className="text-xs text-slate-300 mt-0.5">
+                      {round.focus}
+                    </p>
+                    <p className="text-[11px] text-slate-500 mt-1">
+                      Why this round matters: {round.why}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Key skills with self-assessment */}

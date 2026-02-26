@@ -268,6 +268,193 @@ export function buildInterviewQuestions(extractedSkills) {
   return questions.slice(0, 10);
 }
 
+export function buildCompanyIntel(company, extractedSkills) {
+  const name = String(company || "").trim();
+  if (!name) return null;
+
+  const lower = name.toLowerCase();
+
+  let industry = "Technology Services";
+  if (/\b(bank|finance|fintech)\b/i.test(lower)) {
+    industry = "Financial Services";
+  } else if (/\b(ecommerce|retail)\b/i.test(lower)) {
+    industry = "E‑commerce / Retail";
+  } else if (/\b(health|medic|pharma|hospital)\b/i.test(lower)) {
+    industry = "Healthcare / Life Sciences";
+  } else if (/\b(consulting)\b/i.test(lower)) {
+    industry = "Consulting / Technology Services";
+  }
+
+  const enterpriseNames = [
+    "amazon",
+    "google",
+    "microsoft",
+    "meta",
+    "facebook",
+    "apple",
+    "netflix",
+    "adobe",
+    "ibm",
+    "oracle",
+    "infosys",
+    "tcs",
+    "tata consultancy services",
+    "wipro",
+    "accenture",
+    "capgemini",
+    "cognizant",
+    "hcl",
+    "deloitte"
+  ];
+
+  let sizeKey = "startup";
+  let sizeLabel = "Startup (<200)";
+
+  if (enterpriseNames.some((known) => lower.includes(known))) {
+    sizeKey = "enterprise";
+    sizeLabel = "Enterprise (2000+)";
+  }
+
+  const web = extractedSkills["Web"] || [];
+  const data = extractedSkills["Data"] || [];
+  const cloud = extractedSkills["Cloud/DevOps"] || [];
+
+  const typicalFocus = [];
+
+  if (sizeKey === "enterprise") {
+    typicalFocus.push(
+      "Structured DSA + core CS fundamentals with consistent bar across batches."
+    );
+    typicalFocus.push(
+      "Multiple evaluation rounds: online assessments followed by focused technical and HR conversations."
+    );
+    if (web.length > 0 || data.length > 0 || cloud.length > 0) {
+      typicalFocus.push(
+        "Depth in the primary tech stack (web/services/data) in at least one technical round."
+      );
+    } else {
+      typicalFocus.push(
+        "Breadth-first screening of CS fundamentals, followed by role-specific deep dives."
+      );
+    }
+  } else {
+    typicalFocus.push(
+      "Practical problem solving and ability to ship features end‑to‑end."
+    );
+    if (web.includes("React") || web.includes("Node.js") || web.includes("Express")) {
+      typicalFocus.push(
+        "Hands‑on skills with the actual stack (e.g. React/Node) and comfort navigating existing code."
+      );
+    }
+    if (cloud.length > 0) {
+      typicalFocus.push(
+        "Comfort with basic deployment, debugging logs, and owning changes in production‑like environments."
+      );
+    }
+    typicalFocus.push(
+      "Communication, initiative, and culture fit often weighed as highly as pure DSA performance."
+    );
+  }
+
+  return {
+    name,
+    industry,
+    sizeKey,
+    sizeLabel,
+    typicalFocus
+  };
+}
+
+export function buildRoundMapping(companyIntel, extractedSkills) {
+  if (!companyIntel) return [];
+
+  const size = companyIntel.sizeKey || "startup";
+  const web = extractedSkills["Web"] || [];
+  const core = extractedSkills["Core CS"] || [];
+  const hasDSA = core.includes("DSA") || hasSkill(extractedSkills, "DSA");
+
+  const rounds = [];
+
+  if (size === "enterprise") {
+    if (hasDSA) {
+      rounds.push({
+        title: "Online Test (DSA + Aptitude)",
+        focus: "Timed coding questions and aptitude to filter for fundamentals and speed.",
+        why: "Ensures you can handle pressure, constraints, and standard campus‑style assessments."
+      });
+      rounds.push({
+        title: "Technical Round (DSA + Core CS)",
+        focus: "Whiteboard or online coding plus OS/DBMS/Networks/OOP discussion.",
+        why: "Validates that your CS foundation is strong enough for large‑scale systems."
+      });
+    } else {
+      rounds.push({
+        title: "Online Assessment (Coding + Basics)",
+        focus: "General coding, reasoning, and basic CS concepts.",
+        why: "Screens for broad capability before investing in longer interviews."
+      });
+    }
+
+    rounds.push({
+      title: "Technical + Project Discussion",
+      focus: "Deep dive into 1–2 projects and technology choices.",
+      why: "Checks how you reason about trade‑offs, debugging, and long‑term maintainability."
+    });
+
+    rounds.push({
+      title: "Managerial / HR",
+      focus: "Behavioral questions, expectations, and team fit.",
+      why: "Aligns your motivations, communication style, and growth plans with the organization."
+    });
+  } else {
+    const hasFrontend =
+      web.includes("React") ||
+      web.includes("Next.js") ||
+      hasSkill(extractedSkills, "React");
+    const hasBackend =
+      web.includes("Node.js") ||
+      web.includes("Express") ||
+      hasSkill(extractedSkills, "Node.js") ||
+      hasSkill(extractedSkills, "Express");
+
+    if (hasFrontend || hasBackend) {
+      rounds.push({
+        title: "Practical coding round",
+        focus: "Implement a feature or small service close to the real codebase.",
+        why: "Shows how quickly you can understand requirements and deliver working code."
+      });
+      rounds.push({
+        title: "System / Architecture discussion",
+        focus: "Talk through design choices, trade‑offs, and how you’d evolve the system.",
+        why: "Checks your ability to reason about scale, reliability, and future changes."
+      });
+      rounds.push({
+        title: "Culture & collaboration",
+        focus: "Team fit, ownership mindset, expectations on pace and communication.",
+        why: "Startups rely heavily on trust, autonomy, and clear communication in small teams."
+      });
+    } else {
+      rounds.push({
+        title: "Hands‑on coding",
+        focus: "Solve practical problems in your primary language.",
+        why: "Confirms you can write clean, working code without heavy scaffolding."
+      });
+      rounds.push({
+        title: "Technical deep dive",
+        focus: "Discuss projects, debugging stories, and tools you actually use.",
+        why: "Focuses on how you work day‑to‑day rather than theoretical CS depth."
+      });
+      rounds.push({
+        title: "Founder / HR conversation",
+        focus: "Motivation, expectations, and how you think about joining an early‑stage team.",
+        why: "Ensures alignment on risk, learning pace, and responsibilities."
+      });
+    }
+  }
+
+  return rounds;
+}
+
 export function analyzeJD({ company, role, jdText }) {
   const extractedSkills = extractSkillsFromJD(jdText);
   const checklist = buildRoundChecklist(extractedSkills);
@@ -280,12 +467,17 @@ export function analyzeJD({ company, role, jdText }) {
     extractedSkills
   });
 
+  const companyIntel = buildCompanyIntel(company, extractedSkills);
+  const roundMapping = buildRoundMapping(companyIntel, extractedSkills);
+
   return {
     extractedSkills,
     checklist,
     plan,
     questions,
-    readinessScore
+    readinessScore,
+    companyIntel,
+    roundMapping
   };
 }
 
