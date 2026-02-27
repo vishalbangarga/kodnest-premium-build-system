@@ -214,6 +214,7 @@ body {
     font-size: 14px;
     font-weight: 500;
     color: var(--color-text);
+    margin-bottom: 0;
 }
 
 .text-input,
@@ -391,4 +392,195 @@ body {
     margin: 0;
     padding-left: 20px;
     font-size: 14px;
+}
+
+/* ==== TEMPLATE TABS ==== */
+.template-tabs {
+    display: flex;
+    gap: var(--space-1);
+    margin-bottom: var(--space-2);
+    padding: var(--space-1);
+    background-color: rgba(17, 17, 17, 0.05);
+    border-radius: var(--radius-sm);
+}
+
+.template-tab {
+    flex: 1;
+    text-align: center;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(17, 17, 17, 0.6);
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: var(--font-sans);
+}
+
+.template-tab:hover {
+    color: var(--color-text);
+}
+
+.template-tab.active {
+    background: #ffffff;
+    color: var(--color-text);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* ==== TEMPLATES ==== */
+
+/* Classic */
+.template-classic {
+    font-family: var(--font-serif);
+}
+
+/* Modern */
+.template-modern {
+    font-family: var(--font-sans);
+}
+
+.template-modern .resume-header {
+    text-align: left;
+    border-bottom: 2px solid var(--color-text);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+}
+
+.template-modern .resume-name {
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: 32px;
+    letter-spacing: -0.02em;
+    text-transform: none;
+    margin: 0;
+}
+
+.template-modern .resume-contact {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    font-size: 13px;
+}
+
+.template-modern .resume-section-title {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    border-bottom: none;
+    padding-bottom: 0;
+    position: relative;
+    color: var(--color-text);
+}
+
+.template-modern .resume-section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 24px;
+    height: 2px;
+    background-color: var(--color-text);
+}
+
+/* Minimal */
+.template-minimal {
+    font-family: var(--font-sans);
+    color: #222;
+}
+
+.template-minimal .resume-header {
+    text-align: left;
+    border-bottom: none;
+    margin-bottom: 32px;
+    padding-bottom: 0;
+}
+
+.template-minimal .resume-name {
+    font-family: var(--font-sans);
+    font-weight: 300;
+    font-size: 28px;
+    letter-spacing: 0.05em;
+    text-transform: lowercase;
+    margin-bottom: 12px;
+}
+
+.template-minimal .resume-contact {
+    justify-content: flex-start;
+    gap: 16px;
+    font-size: 12px;
+    color: #666;
+    letter-spacing: 0.02em;
+}
+
+.template-minimal .resume-section {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.template-minimal .resume-section-title {
+    font-size: 11px;
+    font-weight: 500;
+    color: #888;
+    border-bottom: none;
+    margin: 0;
+    padding: 0;
+}
+
+.template-minimal .resume-item {
+    margin-bottom: 16px;
+}
+
+.template-minimal .resume-item-header {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 4px;
+}
+
+.template-minimal .resume-item-title {
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.template-minimal .resume-item-subtitle {
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 4px;
+}
+
+/* ==== GUIDANCE MESSAGES ==== */
+.guidance-msg {
+    font-size: 12px;
+    color: var(--color-warning);
+    margin-top: 6px;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    font-family: var(--font-sans);
+    background-color: rgba(197, 139, 43, 0.06);
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--color-warning);
+}
+
+.guidance-msg-icon {
+    font-size: 14px;
+    line-height: 1;
+}
+
+.guidance-msg-content {
+    flex: 1;
+}
+
+.guidance-msg-content div {
+    margin-bottom: 2px;
+}
+
+.guidance-msg-content div:last-child {
+    margin-bottom: 0;
 }

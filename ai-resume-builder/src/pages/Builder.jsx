@@ -22,6 +22,10 @@ function Builder() {
         };
     });
 
+    const [selectedTemplate, setSelectedTemplate] = useState(() => {
+        return localStorage.getItem("resumeTemplate") || "classic";
+    });
+
     const [atsScore, setAtsScore] = useState(0);
     const [suggestions, setSuggestions] = useState([]);
 
@@ -29,6 +33,7 @@ function Builder() {
     useEffect(() => {
         // Save to local storage
         localStorage.setItem("resumeBuilderData", JSON.stringify(resumeData));
+        localStorage.setItem("resumeTemplate", selectedTemplate);
 
         // Calculate ATS Score
         let score = 0;
@@ -39,7 +44,7 @@ function Builder() {
         if (summaryWords >= 40 && summaryWords <= 120) {
             score += 15;
         } else {
-            newSuggestions.push("Write a stronger summary (40–120 words).");
+            newSuggestions.push("Expand summary to 40+ words.");
         }
 
         // Projects: +10 if >= 2 projects (with some text)
@@ -55,7 +60,7 @@ function Builder() {
         if (validExp.length >= 1) {
             score += 10;
         } else {
-            newSuggestions.push("Add at least 1 experience entry.");
+            newSuggestions.push("Add experience or internship work.");
         }
 
         // Skills: +10 if >= 8 items
@@ -63,7 +68,7 @@ function Builder() {
         if (skillsList.length >= 8) {
             score += 10;
         } else {
-            newSuggestions.push("Add more skills (target 8+).");
+            newSuggestions.push("Expand skills list to 8+ items.");
         }
 
         // Links: +10 if github or linkedin exists
@@ -78,7 +83,7 @@ function Builder() {
         if (/\d|%|k\b|m\b/i.test(expProjText)) {
             score += 15;
         } else {
-            newSuggestions.push("Add measurable impact (numbers, %, etc.) in bullets.");
+            newSuggestions.push("Add measurable impact (numbers).");
         }
 
         // Education: +10 if complete
@@ -91,7 +96,7 @@ function Builder() {
 
         setAtsScore(Math.min(100, score));
         setSuggestions(newSuggestions.slice(0, 3)); // Max 3 suggestions
-    }, [resumeData]);
+    }, [resumeData, selectedTemplate]);
 
     // Handlers
     const handlePersonalChange = (field, value) => {
@@ -123,6 +128,33 @@ function Builder() {
             ...prev,
             [section]: [...prev[section], { id: Date.now(), ...defaultObj }]
         }));
+    };
+
+    // Guidance Check Logic
+    const actionVerbs = ["Built", "Developed", "Designed", "Implemented", "Led", "Improved", "Created", "Optimized", "Automated", "Engineered", "Managed", "Architected", "Spearheaded", "Directed", "Executed", "Launched", "Resolved", "Reduced", "Increased"];
+
+    const checkBulletGuidance = (text) => {
+        if (!text || !text.trim()) return { missingVerb: false, missingNumber: false };
+        const lines = text.split('\n').filter(line => line.trim().length > 0);
+        let missingVerb = false;
+        let missingNumber = false;
+
+        lines.forEach(line => {
+            const trimmed = line.trim();
+            // Start of bullet (ignoring leading hyphens/bullets/spaces)
+            const cleanLine = trimmed.replace(/^[-*•\s]+/, '');
+            if (cleanLine) {
+                const firstWord = cleanLine.split(/\s+/)[0].replace(/[^a-zA-Z]/g, '');
+                if (firstWord && !actionVerbs.some(v => v.toLowerCase() === firstWord.toLowerCase())) {
+                    missingVerb = true;
+                }
+                if (!/\d|%|k\b|m\b/i.test(cleanLine)) {
+                    missingNumber = true;
+                }
+            }
+        });
+
+        return { missingVerb, missingNumber };
     };
 
     return (
@@ -206,17 +238,29 @@ function Builder() {
                             <button className="btn btn--secondary" style={{ padding: '4px 12px', fontSize: '13px' }} onClick={() => addArrayItem('experience', { role: "", details: "" })}>+ Add</button>
                         </header>
                         <div className="card__body">
-                            {resumeData.experience.map((exp, idx) => (
-                                <div key={exp.id} style={{ marginBottom: idx < resumeData.experience.length - 1 ? '16px' : '0', paddingBottom: idx < resumeData.experience.length - 1 ? '16px' : '0', borderBottom: idx < resumeData.experience.length - 1 ? '1px dashed rgba(17,17,17,0.1)' : 'none' }}>
-                                    <div className="field-group" style={{ marginBottom: '8px' }}>
-                                        <label className="field-label">Role & Company</label>
-                                        <input className="text-input" type="text" placeholder="e.g. Senior Software Engineer at Tech Corp" value={exp.role} onChange={(e) => handleArrayChange('experience', idx, 'role', e.target.value)} />
+                            {resumeData.experience.map((exp, idx) => {
+                                const { missingVerb, missingNumber } = checkBulletGuidance(exp.details);
+                                return (
+                                    <div key={exp.id} style={{ marginBottom: idx < resumeData.experience.length - 1 ? '16px' : '0', paddingBottom: idx < resumeData.experience.length - 1 ? '16px' : '0', borderBottom: idx < resumeData.experience.length - 1 ? '1px dashed rgba(17,17,17,0.1)' : 'none' }}>
+                                        <div className="field-group" style={{ marginBottom: '8px' }}>
+                                            <label className="field-label">Role & Company</label>
+                                            <input className="text-input" type="text" placeholder="e.g. Senior Software Engineer at Tech Corp" value={exp.role} onChange={(e) => handleArrayChange('experience', idx, 'role', e.target.value)} />
+                                        </div>
+                                        <div className="field-group">
+                                            <textarea className="text-area" placeholder="Built scalable systems. Improved performance by 30%..." value={exp.details} onChange={(e) => handleArrayChange('experience', idx, 'details', e.target.value)}></textarea>
+                                            {(missingVerb || missingNumber) && (
+                                                <div className="guidance-msg">
+                                                    <span className="guidance-msg-icon">💡</span>
+                                                    <div className="guidance-msg-content">
+                                                        {missingVerb && <div>Start bullets with a strong action verb.</div>}
+                                                        {missingNumber && <div>Add measurable impact (numbers/metrics).</div>}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                    <div className="field-group">
-                                        <textarea className="text-area" placeholder="Built scalable systems. Improved performance by 30%..." value={exp.details} onChange={(e) => handleArrayChange('experience', idx, 'details', e.target.value)}></textarea>
-                                    </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </article>
 
@@ -227,17 +271,29 @@ function Builder() {
                             <button className="btn btn--secondary" style={{ padding: '4px 12px', fontSize: '13px' }} onClick={() => addArrayItem('projects', { name: "", details: "" })}>+ Add</button>
                         </header>
                         <div className="card__body">
-                            {resumeData.projects.map((proj, idx) => (
-                                <div key={proj.id} style={{ marginBottom: idx < resumeData.projects.length - 1 ? '16px' : '0', paddingBottom: idx < resumeData.projects.length - 1 ? '16px' : '0', borderBottom: idx < resumeData.projects.length - 1 ? '1px dashed rgba(17,17,17,0.1)' : 'none' }}>
-                                    <div className="field-group" style={{ marginBottom: '8px' }}>
-                                        <label className="field-label">Project Name</label>
-                                        <input className="text-input" type="text" placeholder="e.g. Premium Build System" value={proj.name} onChange={(e) => handleArrayChange('projects', idx, 'name', e.target.value)} />
+                            {resumeData.projects.map((proj, idx) => {
+                                const { missingVerb, missingNumber } = checkBulletGuidance(proj.details);
+                                return (
+                                    <div key={proj.id} style={{ marginBottom: idx < resumeData.projects.length - 1 ? '16px' : '0', paddingBottom: idx < resumeData.projects.length - 1 ? '16px' : '0', borderBottom: idx < resumeData.projects.length - 1 ? '1px dashed rgba(17,17,17,0.1)' : 'none' }}>
+                                        <div className="field-group" style={{ marginBottom: '8px' }}>
+                                            <label className="field-label">Project Name</label>
+                                            <input className="text-input" type="text" placeholder="e.g. Premium Build System" value={proj.name} onChange={(e) => handleArrayChange('projects', idx, 'name', e.target.value)} />
+                                        </div>
+                                        <div className="field-group">
+                                            <textarea className="text-area" placeholder="Architected a scalable resume platform using Vite and React." value={proj.details} onChange={(e) => handleArrayChange('projects', idx, 'details', e.target.value)}></textarea>
+                                            {(missingVerb || missingNumber) && (
+                                                <div className="guidance-msg">
+                                                    <span className="guidance-msg-icon">💡</span>
+                                                    <div className="guidance-msg-content">
+                                                        {missingVerb && <div>Start bullets with a strong action verb.</div>}
+                                                        {missingNumber && <div>Add measurable impact (numbers/metrics).</div>}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                    <div className="field-group">
-                                        <textarea className="text-area" placeholder="Architected a scalable resume platform using Vite and React." value={proj.details} onChange={(e) => handleArrayChange('projects', idx, 'details', e.target.value)}></textarea>
-                                    </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </article>
 
@@ -284,8 +340,7 @@ function Builder() {
                         borderRadius: '8px',
                         padding: '24px',
                         border: '1px solid rgba(17,17,17,0.1)',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.02)',
-                        marginBottom: '8px'
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.02)'
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
                             <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 600, fontFamily: 'system-ui, sans-serif' }}>ATS Readiness Score</h3>
@@ -310,7 +365,7 @@ function Builder() {
                         {/* Suggestions List */}
                         {suggestions.length > 0 ? (
                             <div>
-                                <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Suggestions to improve</h4>
+                                <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Top 3 Improvements</h4>
                                 <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '14px', color: '#333' }}>
                                     {suggestions.map((s, i) => (
                                         <li key={i} style={{ marginBottom: '4px' }}>{s}</li>
@@ -324,80 +379,103 @@ function Builder() {
                         )}
                     </div>
 
+                    {/* Template Selection Tabs */}
+                    <div className="template-tabs">
+                        <button className={`template-tab ${selectedTemplate === 'classic' ? 'active' : ''}`} onClick={() => setSelectedTemplate('classic')}>Classic</button>
+                        <button className={`template-tab ${selectedTemplate === 'modern' ? 'active' : ''}`} onClick={() => setSelectedTemplate('modern')}>Modern</button>
+                        <button className={`template-tab ${selectedTemplate === 'minimal' ? 'active' : ''}`} onClick={() => setSelectedTemplate('minimal')}>Minimal</button>
+                    </div>
+
+                    {/* Real-time Preview Area */}
                     <div className="preview-shell">
-                        <div style={{ color: '#000', fontSize: '14px', lineHeight: 1.6, wordBreak: 'break-word' }}>
+                        <div className={`resume-document template-${selectedTemplate}`} style={{ padding: 0, minHeight: '100%', background: 'transparent' }}>
+
                             {/* Personal Header */}
                             {resumeData.personal.fullName && (
-                                <h1 style={{ fontSize: '24px', margin: '0 0 10px 0', fontFamily: 'Georgia, serif', borderBottom: '1px solid currentColor', paddingBottom: '8px', textTransform: 'uppercase' }}>
-                                    {resumeData.personal.fullName}
-                                </h1>
-                            )}
-
-                            {(resumeData.personal.email || resumeData.personal.location || resumeData.links.github || resumeData.links.linkedin || resumeData.personal.phone) && (
-                                <p style={{ margin: '0 0 20px 0', fontSize: '12px' }}>
-                                    {[
-                                        resumeData.personal.email,
-                                        resumeData.personal.phone,
-                                        resumeData.personal.location,
-                                        resumeData.links.github,
-                                        resumeData.links.linkedin
-                                    ].filter(Boolean).join(" | ")}
-                                </p>
+                                <header className="resume-header">
+                                    <h1 className="resume-name">{resumeData.personal.fullName}</h1>
+                                    {(resumeData.personal.email || resumeData.personal.location || resumeData.links.github || resumeData.links.linkedin || resumeData.personal.phone) && (
+                                        <div className="resume-contact">
+                                            {resumeData.personal.email && <span>{resumeData.personal.email}</span>}
+                                            {resumeData.personal.phone && <span>{resumeData.personal.phone}</span>}
+                                            {resumeData.personal.location && <span>{resumeData.personal.location}</span>}
+                                            {resumeData.links.github && <span>{resumeData.links.github}</span>}
+                                            {resumeData.links.linkedin && <span>{resumeData.links.linkedin}</span>}
+                                        </div>
+                                    )}
+                                </header>
                             )}
 
                             {/* Summary */}
                             {resumeData.summary.trim() && (
-                                <>
-                                    <h2 style={{ fontSize: '14px', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '16px', marginBottom: '8px' }}>SUMMARY</h2>
-                                    <p style={{ whiteSpace: 'pre-wrap' }}>{resumeData.summary}</p>
-                                </>
+                                <section className="resume-section">
+                                    <h2 className="resume-section-title">Summary</h2>
+                                    <p style={{ margin: 0, fontSize: '14px', whiteSpace: 'pre-wrap' }}>{resumeData.summary}</p>
+                                </section>
                             )}
 
                             {/* Education */}
                             {resumeData.education.some(e => e.text.trim()) && (
-                                <>
-                                    <h2 style={{ fontSize: '14px', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '24px', marginBottom: '8px' }}>EDUCATION</h2>
-                                    {resumeData.education.filter(e => e.text.trim()).map(edu => (
-                                        <div key={edu.id} style={{ marginBottom: '8px' }}>
-                                            {edu.text}
+                                <section className="resume-section">
+                                    <h2 className="resume-section-title">Education</h2>
+                                    {resumeData.education.filter(e => e.text.trim()).map((edu, idx) => (
+                                        <div className="resume-item" key={edu.id} style={{ marginBottom: idx === resumeData.education.length - 1 ? 0 : '12px' }}>
+                                            <div className="resume-item-title">{edu.text}</div>
                                         </div>
                                     ))}
-                                </>
+                                </section>
                             )}
 
                             {/* Experience */}
                             {resumeData.experience.some(e => e.role.trim() || e.details.trim()) && (
-                                <>
-                                    <h2 style={{ fontSize: '14px', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '24px', marginBottom: '8px' }}>EXPERIENCE</h2>
-                                    {resumeData.experience.filter(e => e.role.trim() || e.details.trim()).map(exp => (
-                                        <div key={exp.id} style={{ marginBottom: '12px' }}>
-                                            {exp.role.trim() && <strong style={{ display: 'block' }}>{exp.role}</strong>}
-                                            {exp.details.trim() && <div style={{ whiteSpace: 'pre-wrap' }}>{exp.details}</div>}
+                                <section className="resume-section">
+                                    <h2 className="resume-section-title">Experience</h2>
+                                    {resumeData.experience.filter(e => e.role.trim() || e.details.trim()).map((exp, idx) => (
+                                        <div className="resume-item" key={exp.id} style={{ marginBottom: idx === resumeData.experience.length - 1 ? 0 : '16px' }}>
+                                            {exp.role.trim() && (
+                                                <div className="resume-item-header">
+                                                    <div className="resume-item-title">{exp.role}</div>
+                                                </div>
+                                            )}
+                                            {exp.details.trim() && (
+                                                <div style={{ fontSize: '14px', whiteSpace: 'pre-wrap', marginTop: '4px' }}>
+                                                    {exp.details}
+                                                </div>
+                                            )}
                                         </div>
                                     ))}
-                                </>
+                                </section>
                             )}
 
                             {/* Projects */}
                             {resumeData.projects.some(p => p.name.trim() || p.details.trim()) && (
-                                <>
-                                    <h2 style={{ fontSize: '14px', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '24px', marginBottom: '8px' }}>PROJECTS</h2>
-                                    {resumeData.projects.filter(p => p.name.trim() || p.details.trim()).map(proj => (
-                                        <div key={proj.id} style={{ marginBottom: '12px' }}>
-                                            {proj.name.trim() && <strong style={{ display: 'block' }}>{proj.name}</strong>}
-                                            {proj.details.trim() && <div style={{ whiteSpace: 'pre-wrap' }}>{proj.details}</div>}
+                                <section className="resume-section">
+                                    <h2 className="resume-section-title">Projects</h2>
+                                    {resumeData.projects.filter(p => p.name.trim() || p.details.trim()).map((proj, idx) => (
+                                        <div className="resume-item" key={proj.id} style={{ marginBottom: idx === resumeData.projects.length - 1 ? 0 : '16px' }}>
+                                            {proj.name.trim() && (
+                                                <div className="resume-item-header">
+                                                    <div className="resume-item-title">{proj.name}</div>
+                                                </div>
+                                            )}
+                                            {proj.details.trim() && (
+                                                <div style={{ fontSize: '14px', whiteSpace: 'pre-wrap', marginTop: '4px' }}>
+                                                    {proj.details}
+                                                </div>
+                                            )}
                                         </div>
                                     ))}
-                                </>
+                                </section>
                             )}
 
                             {/* Skills */}
                             {resumeData.skills.trim() && (
-                                <>
-                                    <h2 style={{ fontSize: '14px', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '24px', marginBottom: '8px' }}>SKILLS</h2>
-                                    <p>{resumeData.skills}</p>
-                                </>
+                                <section className="resume-section">
+                                    <h2 className="resume-section-title">Skills</h2>
+                                    <p style={{ margin: 0, fontSize: '14px', whiteSpace: 'pre-wrap' }}>{resumeData.skills}</p>
+                                </section>
                             )}
+
                         </div>
                     </div>
                 </aside>
