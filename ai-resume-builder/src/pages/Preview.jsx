@@ -7,7 +7,23 @@ function Preview() {
         const saved = localStorage.getItem("resumeBuilderData");
         if (saved) {
             try {
-                return JSON.parse(saved);
+                const parsed = JSON.parse(saved);
+
+                // Backwards compatibility for skills (string -> object)
+                if (typeof parsed.skills === 'string') {
+                    const oldSkills = parsed.skills.split(',').map(s => s.trim()).filter(Boolean);
+                    parsed.skills = { technical: oldSkills, soft: [], tools: [] };
+                }
+
+                // Backwards compatibility for projects structure
+                parsed.projects = parsed.projects.map(p => ({
+                    ...p,
+                    techStack: p.techStack || [],
+                    liveUrl: p.liveUrl || "",
+                    githubUrl: p.githubUrl || ""
+                }));
+
+                return parsed;
             } catch (e) {
                 console.error("Failed to parse resume data from local storage", e);
             }
@@ -17,8 +33,8 @@ function Preview() {
             summary: "",
             education: [{ id: 1, text: "" }],
             experience: [{ id: 1, role: "", details: "" }],
-            projects: [{ id: 1, name: "", details: "" }],
-            skills: "",
+            projects: [{ id: 1, name: "", details: "", techStack: [], liveUrl: "", githubUrl: "" }],
+            skills: { technical: [], soft: [], tools: [] },
             links: { github: "", linkedin: "" }
         };
     });
@@ -94,16 +110,26 @@ function Preview() {
         if (validProj.length > 0) {
             textResult.push("PROJECTS");
             validProj.forEach(proj => {
-                if (proj.name.trim()) textResult.push(proj.name.trim());
+                let projTitleLine = proj.name.trim();
+                if (proj.liveUrl) projTitleLine += ` (Live: ${proj.liveUrl})`;
+                if (proj.githubUrl) projTitleLine += ` (GitHub: ${proj.githubUrl})`;
+
+                if (projTitleLine) textResult.push(projTitleLine);
                 if (proj.details.trim()) textResult.push(proj.details.trim());
+                if (proj.techStack && proj.techStack.length > 0) {
+                    textResult.push(`Tech Stack: ${proj.techStack.join(", ")}`);
+                }
                 textResult.push(""); // Spacing between projects
             });
         }
 
         // Skills
-        if (skills.trim()) {
+        const hasSkills = skills.technical.length > 0 || skills.soft.length > 0 || skills.tools.length > 0;
+        if (hasSkills) {
             textResult.push("SKILLS");
-            textResult.push(skills.trim());
+            if (skills.technical.length > 0) textResult.push(`Technical: ${skills.technical.join(", ")}`);
+            if (skills.soft.length > 0) textResult.push(`Soft Skills: ${skills.soft.join(", ")}`);
+            if (skills.tools.length > 0) textResult.push(`Tools & Technologies: ${skills.tools.join(", ")}`);
             textResult.push("");
         }
 
@@ -219,12 +245,23 @@ function Preview() {
                             <div className="resume-item" key={proj.id} style={{ marginBottom: idx === resumeData.projects.length - 1 ? 0 : '20px' }}>
                                 {proj.name.trim() && (
                                     <div className="resume-item-header">
-                                        <div className="resume-item-title">{proj.name}</div>
+                                        <div className="resume-item-title">
+                                            {proj.name}
+                                            {proj.githubUrl && <a href={proj.githubUrl} target="_blank" rel="noreferrer" className="icon-link">🐙 Repo</a>}
+                                            {proj.liveUrl && <a href={proj.liveUrl} target="_blank" rel="noreferrer" className="icon-link">🔗 Live</a>}
+                                        </div>
                                     </div>
                                 )}
                                 {proj.details.trim() && (
-                                    <div style={{ fontSize: '14px', whiteSpace: 'pre-wrap', marginTop: '6px' }}>
+                                    <div style={{ fontSize: '14px', whiteSpace: 'pre-wrap', marginTop: '6px', marginBottom: proj.techStack.length ? '8px' : '0' }}>
                                         {proj.details}
+                                    </div>
+                                )}
+                                {proj.techStack && proj.techStack.length > 0 && (
+                                    <div>
+                                        {proj.techStack.map(tech => (
+                                            <span key={tech} className="tech-pill">{tech}</span>
+                                        ))}
                                     </div>
                                 )}
                             </div>
@@ -233,10 +270,40 @@ function Preview() {
                 )}
 
                 {/* Skills */}
-                {resumeData.skills.trim() && (
+                {(resumeData.skills.technical.length > 0 || resumeData.skills.soft.length > 0 || resumeData.skills.tools.length > 0) && (
                     <section className="resume-section">
                         <h2 className="resume-section-title">Skills</h2>
-                        <p style={{ margin: 0, fontSize: '14px', whiteSpace: 'pre-wrap' }}>{resumeData.skills}</p>
+
+                        {resumeData.skills.technical.length > 0 && (
+                            <div style={{ marginBottom: '8px' }}>
+                                <strong style={{ fontSize: '13px', display: 'block', marginBottom: '4px' }}>Technical</strong>
+                                <div>
+                                    {resumeData.skills.technical.map(skill => (
+                                        <span key={skill} className="skill-pill">{skill}</span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                        {resumeData.skills.soft.length > 0 && (
+                            <div style={{ marginBottom: '8px' }}>
+                                <strong style={{ fontSize: '13px', display: 'block', marginBottom: '4px' }}>Soft Skills</strong>
+                                <div>
+                                    {resumeData.skills.soft.map(skill => (
+                                        <span key={skill} className="skill-pill">{skill}</span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                        {resumeData.skills.tools.length > 0 && (
+                            <div>
+                                <strong style={{ fontSize: '13px', display: 'block', marginBottom: '4px' }}>Tools & Technologies</strong>
+                                <div>
+                                    {resumeData.skills.tools.map(skill => (
+                                        <span key={skill} className="skill-pill">{skill}</span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </section>
                 )}
 
