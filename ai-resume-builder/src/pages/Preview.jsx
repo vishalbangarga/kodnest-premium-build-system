@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import ResumePreview from "../components/ResumePreview";
 
 function Preview() {
     // 1. STATE INITIALIZATION (Local Storage)
@@ -43,11 +44,17 @@ function Preview() {
         return localStorage.getItem("resumeTemplate") || "classic";
     });
 
+    const [selectedColor, setSelectedColor] = useState(() => {
+        return localStorage.getItem("resumeColor") || "teal";
+    });
+
     const [copyStatus, setCopyStatus] = useState("Copy Resume as Text");
+    const [showToast, setShowToast] = useState(false);
 
     useEffect(() => {
         localStorage.setItem("resumeTemplate", selectedTemplate);
-    }, [selectedTemplate]);
+        localStorage.setItem("resumeColor", selectedColor);
+    }, [selectedTemplate, selectedColor]);
 
     // Validation Check for Warnings
     const isMissingName = !resumeData.personal.fullName.trim();
@@ -57,6 +64,11 @@ function Preview() {
     const showWarning = isMissingName || isMissingExpAndProj;
 
     // Export Handlers
+    const handleDownloadPdf = () => {
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
+    };
+
     const handlePrint = () => {
         window.print();
     };
@@ -172,142 +184,37 @@ function Preview() {
                     <button className="btn btn--secondary" style={{ backgroundColor: '#fff' }} onClick={handleCopyText}>
                         📄 {copyStatus}
                     </button>
-                    <button className="btn btn--primary" onClick={handlePrint}>
-                        🖨️ Print / Save as PDF
+                    <button className="btn btn--primary" onClick={handleDownloadPdf}>
+                        Download PDF
                     </button>
                 </div>
             </div>
 
             {/* Printable Document Area */}
-            <div className={`resume-document template-${selectedTemplate}`}>
-                {/* Personal Header */}
-                {(resumeData.personal.fullName || resumeData.personal.email || resumeData.personal.phone || resumeData.personal.location || resumeData.links.github || resumeData.links.linkedin) && (
-                    <header className="resume-header">
-                        {resumeData.personal.fullName && <h1 className="resume-name">{resumeData.personal.fullName}</h1>}
-                        {(resumeData.personal.email || resumeData.personal.location || resumeData.links.github || resumeData.links.linkedin || resumeData.personal.phone) && (
-                            <div className="resume-contact">
-                                {resumeData.personal.email && <span>{resumeData.personal.email}</span>}
-                                {resumeData.personal.phone && <span>{resumeData.personal.phone}</span>}
-                                {resumeData.personal.location && <span>{resumeData.personal.location}</span>}
-                                {resumeData.links.github && <span>{resumeData.links.github}</span>}
-                                {resumeData.links.linkedin && <span>{resumeData.links.linkedin}</span>}
-                            </div>
-                        )}
-                    </header>
-                )}
+            <ResumePreview
+                resumeData={resumeData}
+                selectedTemplate={selectedTemplate}
+                selectedColor={selectedColor}
+            />
 
-                {/* Summary */}
-                {resumeData.summary.trim() && (
-                    <section className="resume-section">
-                        <h2 className="resume-section-title">Professional Summary</h2>
-                        <p style={{ margin: 0, fontSize: '14px', whiteSpace: 'pre-wrap' }}>{resumeData.summary}</p>
-                    </section>
-                )}
-
-                {/* Education */}
-                {resumeData.education.some(e => e.text.trim()) && (
-                    <section className="resume-section">
-                        <h2 className="resume-section-title">Education</h2>
-                        {resumeData.education.filter(e => e.text.trim()).map((edu, idx) => (
-                            <div className="resume-item" key={edu.id} style={{ marginBottom: idx === resumeData.education.length - 1 ? 0 : '15px' }}>
-                                <div className="resume-item-title">{edu.text}</div>
-                            </div>
-                        ))}
-                    </section>
-                )}
-
-                {/* Experience */}
-                {hasValidExp && (
-                    <section className="resume-section">
-                        <h2 className="resume-section-title">Experience</h2>
-                        {resumeData.experience.filter(e => e.role.trim() || e.details.trim()).map((exp, idx) => (
-                            <div className="resume-item" key={exp.id} style={{ marginBottom: idx === resumeData.experience.length - 1 ? 0 : '20px' }}>
-                                {exp.role.trim() && (
-                                    <div className="resume-item-header">
-                                        <div className="resume-item-title">{exp.role}</div>
-                                    </div>
-                                )}
-                                {exp.details.trim() && (
-                                    <div style={{ fontSize: '14px', whiteSpace: 'pre-wrap', marginTop: '6px' }}>
-                                        {exp.details}
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                    </section>
-                )}
-
-                {/* Projects */}
-                {hasValidProj && (
-                    <section className="resume-section">
-                        <h2 className="resume-section-title">Projects</h2>
-                        {resumeData.projects.filter(p => p.name.trim() || p.details.trim()).map((proj, idx) => (
-                            <div className="resume-item" key={proj.id} style={{ marginBottom: idx === resumeData.projects.length - 1 ? 0 : '20px' }}>
-                                {proj.name.trim() && (
-                                    <div className="resume-item-header">
-                                        <div className="resume-item-title">
-                                            {proj.name}
-                                            {proj.githubUrl && <a href={proj.githubUrl} target="_blank" rel="noreferrer" className="icon-link">🐙 Repo</a>}
-                                            {proj.liveUrl && <a href={proj.liveUrl} target="_blank" rel="noreferrer" className="icon-link">🔗 Live</a>}
-                                        </div>
-                                    </div>
-                                )}
-                                {proj.details.trim() && (
-                                    <div style={{ fontSize: '14px', whiteSpace: 'pre-wrap', marginTop: '6px', marginBottom: proj.techStack.length ? '8px' : '0' }}>
-                                        {proj.details}
-                                    </div>
-                                )}
-                                {proj.techStack && proj.techStack.length > 0 && (
-                                    <div>
-                                        {proj.techStack.map(tech => (
-                                            <span key={tech} className="tech-pill">{tech}</span>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                    </section>
-                )}
-
-                {/* Skills */}
-                {(resumeData.skills.technical.length > 0 || resumeData.skills.soft.length > 0 || resumeData.skills.tools.length > 0) && (
-                    <section className="resume-section">
-                        <h2 className="resume-section-title">Skills</h2>
-
-                        {resumeData.skills.technical.length > 0 && (
-                            <div style={{ marginBottom: '8px' }}>
-                                <strong style={{ fontSize: '13px', display: 'block', marginBottom: '4px' }}>Technical</strong>
-                                <div>
-                                    {resumeData.skills.technical.map(skill => (
-                                        <span key={skill} className="skill-pill">{skill}</span>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                        {resumeData.skills.soft.length > 0 && (
-                            <div style={{ marginBottom: '8px' }}>
-                                <strong style={{ fontSize: '13px', display: 'block', marginBottom: '4px' }}>Soft Skills</strong>
-                                <div>
-                                    {resumeData.skills.soft.map(skill => (
-                                        <span key={skill} className="skill-pill">{skill}</span>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                        {resumeData.skills.tools.length > 0 && (
-                            <div>
-                                <strong style={{ fontSize: '13px', display: 'block', marginBottom: '4px' }}>Tools & Technologies</strong>
-                                <div>
-                                    {resumeData.skills.tools.map(skill => (
-                                        <span key={skill} className="skill-pill">{skill}</span>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </section>
-                )}
-
-            </div>
+            {showToast && (
+                <div style={{
+                    position: 'fixed',
+                    bottom: '24px',
+                    right: '24px',
+                    backgroundColor: '#111',
+                    color: '#fff',
+                    padding: '12px 24px',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                    zIndex: 1000,
+                    fontFamily: 'system-ui, sans-serif',
+                    fontSize: '14px',
+                    fontWeight: 500
+                }}>
+                    PDF export ready! Check your downloads.
+                </div>
+            )}
         </div>
     );
 }

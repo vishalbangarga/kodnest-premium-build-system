@@ -394,39 +394,178 @@ body {
     font-size: 14px;
 }
 
-/* ==== TEMPLATE TABS ==== */
-.template-tabs {
+/* ==== CUSTOMIZATION PANEL UI ==== */
+.template-picker {
     display: flex;
-    gap: var(--space-1);
-    margin-bottom: var(--space-2);
-    padding: var(--space-1);
-    background-color: rgba(17, 17, 17, 0.05);
-    border-radius: var(--radius-sm);
+    gap: 16px;
 }
 
-.template-tab {
-    flex: 1;
-    text-align: center;
-    padding: 8px 12px;
-    font-size: 13px;
-    font-weight: 500;
-    color: rgba(17, 17, 17, 0.6);
-    background: transparent;
-    border: none;
-    border-radius: 4px;
+.template-thumbnail {
+    position: relative;
+    width: 120px;
+    background: #fff;
+    border: 2px solid transparent;
+    border-radius: var(--radius-md);
+    padding: 12px;
     cursor: pointer;
     transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.template-thumbnail:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.template-thumbnail.active {
+    border-color: #0066cc;
+    background-color: #f0f7ff;
+}
+
+.thumbnail-sketch {
+    width: 100%;
+    aspect-ratio: 1 / 1.414;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+    gap: 6px;
+}
+
+.sketch-classic .sketch-header {
+    height: 8px;
+    background: #ddd;
+    width: 60%;
+    margin: 0 auto;
+}
+
+.sketch-classic .sketch-line {
+    height: 1px;
+    background: #eee;
+    width: 100%;
+}
+
+.sketch-classic .sketch-block {
+    height: 16px;
+    background: #f0f0f0;
+    width: 100%;
+}
+
+.sketch-modern {
+    flex-direction: row;
+    padding: 0;
+    gap: 0;
+}
+
+.sketch-modern .sketch-sidebar {
+    width: 35%;
+    height: 100%;
+}
+
+.sketch-modern .sketch-main {
+    width: 65%;
+    height: 100%;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.sketch-modern .sketch-header {
+    height: 8px;
+    background: #ddd;
+    width: 80%;
+}
+
+.sketch-modern .sketch-block {
+    height: 16px;
+    background: #f0f0f0;
+    width: 100%;
+}
+
+.sketch-minimal .sketch-header-large {
+    height: 10px;
+    background: #ccc;
+    width: 50%;
+}
+
+.sketch-minimal .sketch-grid {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+}
+
+.sketch-minimal .sketch-col {
+    width: 30%;
+    height: 16px;
+    background: #eee;
+}
+
+.sketch-minimal .sketch-col-wide {
+    width: 70%;
+    height: 24px;
+    background: #f5f5f5;
+}
+
+.thumbnail-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: #333;
     font-family: var(--font-sans);
 }
 
-.template-tab:hover {
-    color: var(--color-text);
+.active-check {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #0066cc;
+    color: #fff;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    border: 2px solid #fff;
 }
 
-.template-tab.active {
-    background: #ffffff;
-    color: var(--color-text);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+.color-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.color-circle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.color-circle.active {
+    border-color: #000;
+    transform: scale(1.1);
+}
+
+.color-check {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 /* ==== TEMPLATES ==== */
@@ -436,19 +575,38 @@ body {
     font-family: var(--font-serif);
 }
 
+.template-classic .resume-section-title {
+    color: var(--accent-color, var(--color-accent));
+    border-bottom: 2px solid var(--accent-color, var(--color-accent));
+}
+
 /* Modern */
 .template-modern {
     font-family: var(--font-sans);
+    display: flex;
+    min-height: 100%;
+}
+
+.template-modern .resume-sidebar {
+    width: 30%;
+    background-color: var(--accent-color, var(--color-success));
+    color: #fff;
+    padding: 32px 24px;
+}
+
+.template-modern .resume-main-content {
+    width: 70%;
+    padding: 32px 32px 32px 40px;
+    background-color: #fff;
 }
 
 .template-modern .resume-header {
     text-align: left;
-    border-bottom: 2px solid var(--color-text);
+    border-bottom: none;
     display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    padding-bottom: 16px;
-    margin-bottom: 24px;
+    flex-direction: column;
+    padding-bottom: 0;
+    margin-bottom: 32px;
 }
 
 .template-modern .resume-name {
@@ -458,32 +616,35 @@ body {
     letter-spacing: -0.02em;
     text-transform: none;
     margin: 0;
+    color: var(--accent-color, var(--color-success));
 }
 
 .template-modern .resume-contact {
     flex-direction: column;
-    align-items: flex-end;
-    gap: 4px;
+    align-items: flex-start;
+    gap: 8px;
     font-size: 13px;
+    color: rgba(255, 255, 255, 0.9);
+    margin-top: 24px;
 }
 
-.template-modern .resume-section-title {
+.template-modern .resume-sidebar .resume-section-title {
+    color: #fff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    margin-top: 32px;
+}
+
+.template-modern .resume-sidebar .skill-pill {
+    border-color: rgba(255, 255, 255, 0.4);
+    color: #fff;
+}
+
+.template-modern .resume-main-content .resume-section-title {
     font-family: var(--font-sans);
     font-weight: 600;
-    border-bottom: none;
-    padding-bottom: 0;
-    position: relative;
+    border-bottom: 2px solid var(--accent-color, var(--color-success));
+    padding-bottom: 4px;
     color: var(--color-text);
-}
-
-.template-modern .resume-section-title::after {
-    content: '';
-    position: absolute;
-    bottom: -4px;
-    left: 0;
-    width: 24px;
-    height: 2px;
-    background-color: var(--color-text);
 }
 
 /* Minimal */
@@ -506,6 +667,7 @@ body {
     letter-spacing: 0.05em;
     text-transform: lowercase;
     margin-bottom: 12px;
+    color: var(--accent-color, #222);
 }
 
 .template-minimal .resume-contact {
@@ -525,11 +687,13 @@ body {
 
 .template-minimal .resume-section-title {
     font-size: 11px;
-    font-weight: 500;
-    color: #888;
+    font-weight: 600;
+    color: var(--accent-color, #888);
     border-bottom: none;
     margin: 0;
     padding: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
 }
 
 .template-minimal .resume-item {
@@ -539,17 +703,6 @@ body {
 .template-minimal .resume-item-header {
     flex-direction: column;
     align-items: flex-start;
-    margin-bottom: 4px;
-}
-
-.template-minimal .resume-item-title {
-    font-weight: 500;
-    font-size: 14px;
-}
-
-.template-minimal .resume-item-subtitle {
-    font-size: 13px;
-    color: #555;
     margin-bottom: 4px;
 }
 

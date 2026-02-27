@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import ResumePreview from "../components/ResumePreview";
 
 function Builder() {
     // 1. STATE INITIALIZATION (Local Storage)
@@ -43,6 +44,10 @@ function Builder() {
         return localStorage.getItem("resumeTemplate") || "classic";
     });
 
+    const [selectedColor, setSelectedColor] = useState(() => {
+        return localStorage.getItem("resumeColor") || "teal";
+    });
+
     const [atsScore, setAtsScore] = useState(0);
     const [suggestions, setSuggestions] = useState([]);
 
@@ -59,6 +64,7 @@ function Builder() {
         // Save to local storage
         localStorage.setItem("resumeBuilderData", JSON.stringify(resumeData));
         localStorage.setItem("resumeTemplate", selectedTemplate);
+        localStorage.setItem("resumeColor", selectedColor);
 
         // Calculate ATS Score
         let score = 0;
@@ -628,145 +634,100 @@ function Builder() {
                         )}
                     </div>
 
-                    {/* Template Selection Tabs */}
-                    <div className="template-tabs">
-                        <button className={`template-tab ${selectedTemplate === 'classic' ? 'active' : ''}`} onClick={() => setSelectedTemplate('classic')}>Classic</button>
-                        <button className={`template-tab ${selectedTemplate === 'modern' ? 'active' : ''}`} onClick={() => setSelectedTemplate('modern')}>Modern</button>
-                        <button className={`template-tab ${selectedTemplate === 'minimal' ? 'active' : ''}`} onClick={() => setSelectedTemplate('minimal')}>Minimal</button>
+                    {/* Customization Panel */}
+                    <div className="customization-panel" style={{ backgroundColor: '#fff', borderRadius: '8px', padding: '24px', border: '1px solid rgba(17,17,17,0.1)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', marginBottom: '24px' }}>
+                        <h3 style={{ margin: '0 0 16px 0', fontSize: '16px', fontWeight: 600, fontFamily: 'system-ui, sans-serif' }}>Template</h3>
+
+                        <div className="template-picker">
+                            {[
+                                { id: 'classic', name: 'Classic', desc: 'Traditional single-column' },
+                                { id: 'modern', name: 'Modern', desc: 'Two-column with sidebar' },
+                                { id: 'minimal', name: 'Minimal', desc: 'Clean, generous whitespace' }
+                            ].map(tpl => (
+                                <button
+                                    key={tpl.id}
+                                    className={`template-thumbnail ${selectedTemplate === tpl.id ? 'active' : ''}`}
+                                    onClick={() => setSelectedTemplate(tpl.id)}
+                                    title={tpl.desc}
+                                >
+                                    <div className={`thumbnail-sketch sketch-${tpl.id}`}>
+                                        {tpl.id === 'classic' && (
+                                            <>
+                                                <div className="sketch-header"></div>
+                                                <div className="sketch-line"></div>
+                                                <div className="sketch-block"></div>
+                                                <div className="sketch-block"></div>
+                                                <div className="sketch-line"></div>
+                                            </>
+                                        )}
+                                        {tpl.id === 'modern' && (
+                                            <>
+                                                <div className="sketch-sidebar" style={{
+                                                    backgroundColor: [
+                                                        { id: 'teal', value: 'hsl(168, 60%, 40%)' },
+                                                        { id: 'navy', value: 'hsl(220, 60%, 35%)' },
+                                                        { id: 'burgundy', value: 'hsl(345, 60%, 35%)' },
+                                                        { id: 'forest', value: 'hsl(150, 50%, 30%)' },
+                                                        { id: 'charcoal', value: 'hsl(0, 0%, 25%)' }
+                                                    ].find(c => c.id === selectedColor)?.value || 'hsl(168, 60%, 40%)'
+                                                }}></div>
+                                                <div className="sketch-main">
+                                                    <div className="sketch-header"></div>
+                                                    <div className="sketch-block"></div>
+                                                    <div className="sketch-block"></div>
+                                                </div>
+                                            </>
+                                        )}
+                                        {tpl.id === 'minimal' && (
+                                            <>
+                                                <div className="sketch-header-large"></div>
+                                                <div className="sketch-grid">
+                                                    <div className="sketch-col"></div>
+                                                    <div className="sketch-col-wide"></div>
+                                                </div>
+                                                <div className="sketch-grid">
+                                                    <div className="sketch-col"></div>
+                                                    <div className="sketch-col-wide"></div>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                    <span className="thumbnail-name">{tpl.name}</span>
+                                    {selectedTemplate === tpl.id && <div className="active-check">✓</div>}
+                                </button>
+                            ))}
+                        </div>
+
+                        <h3 style={{ margin: '24px 0 16px 0', fontSize: '16px', fontWeight: 600, fontFamily: 'system-ui, sans-serif' }}>Accent Color</h3>
+                        <div className="color-picker" style={{ display: 'flex', gap: '12px' }}>
+                            {[
+                                { id: 'teal', value: 'hsl(168, 60%, 40%)', name: 'Teal' },
+                                { id: 'navy', value: 'hsl(220, 60%, 35%)', name: 'Navy' },
+                                { id: 'burgundy', value: 'hsl(345, 60%, 35%)', name: 'Burgundy' },
+                                { id: 'forest', value: 'hsl(150, 50%, 30%)', name: 'Forest' },
+                                { id: 'charcoal', value: 'hsl(0, 0%, 25%)', name: 'Charcoal' }
+                            ].map(color => (
+                                <button
+                                    key={color.id}
+                                    className={`color-circle ${selectedColor === color.id ? 'active' : ''}`}
+                                    style={{ backgroundColor: color.value }}
+                                    onClick={() => setSelectedColor(color.id)}
+                                    title={color.name}
+                                    aria-label={`Select ${color.name} theme`}
+                                >
+                                    {selectedColor === color.id && <span className="color-check">✓</span>}
+                                </button>
+                            ))}
+                        </div>
                     </div>
 
                     {/* Real-time Preview Area */}
-                    <div className="preview-shell">
-                        <div className={`resume-document template-${selectedTemplate}`} style={{ padding: 0, minHeight: '100%', background: 'transparent' }}>
-
-                            {/* Personal Header */}
-                            {resumeData.personal.fullName && (
-                                <header className="resume-header">
-                                    <h1 className="resume-name">{resumeData.personal.fullName}</h1>
-                                    {(resumeData.personal.email || resumeData.personal.location || resumeData.links.github || resumeData.links.linkedin || resumeData.personal.phone) && (
-                                        <div className="resume-contact">
-                                            {resumeData.personal.email && <span>{resumeData.personal.email}</span>}
-                                            {resumeData.personal.phone && <span>{resumeData.personal.phone}</span>}
-                                            {resumeData.personal.location && <span>{resumeData.personal.location}</span>}
-                                            {resumeData.links.github && <span>{resumeData.links.github}</span>}
-                                            {resumeData.links.linkedin && <span>{resumeData.links.linkedin}</span>}
-                                        </div>
-                                    )}
-                                </header>
-                            )}
-
-                            {/* Summary */}
-                            {resumeData.summary.trim() && (
-                                <section className="resume-section">
-                                    <h2 className="resume-section-title">Summary</h2>
-                                    <p style={{ margin: 0, fontSize: '14px', whiteSpace: 'pre-wrap' }}>{resumeData.summary}</p>
-                                </section>
-                            )}
-
-                            {/* Education */}
-                            {resumeData.education.some(e => e.text.trim()) && (
-                                <section className="resume-section">
-                                    <h2 className="resume-section-title">Education</h2>
-                                    {resumeData.education.filter(e => e.text.trim()).map((edu, idx) => (
-                                        <div className="resume-item" key={edu.id} style={{ marginBottom: idx === resumeData.education.length - 1 ? 0 : '12px' }}>
-                                            <div className="resume-item-title">{edu.text}</div>
-                                        </div>
-                                    ))}
-                                </section>
-                            )}
-
-                            {/* Experience */}
-                            {resumeData.experience.some(e => e.role.trim() || e.details.trim()) && (
-                                <section className="resume-section">
-                                    <h2 className="resume-section-title">Experience</h2>
-                                    {resumeData.experience.filter(e => e.role.trim() || e.details.trim()).map((exp, idx) => (
-                                        <div className="resume-item" key={exp.id} style={{ marginBottom: idx === resumeData.experience.length - 1 ? 0 : '16px' }}>
-                                            {exp.role.trim() && (
-                                                <div className="resume-item-header">
-                                                    <div className="resume-item-title">{exp.role}</div>
-                                                </div>
-                                            )}
-                                            {exp.details.trim() && (
-                                                <div style={{ fontSize: '14px', whiteSpace: 'pre-wrap', marginTop: '4px' }}>
-                                                    {exp.details}
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
-                                </section>
-                            )}
-
-                            {/* Projects */}
-                            {resumeData.projects.some(p => p.name.trim() || p.details.trim()) && (
-                                <section className="resume-section">
-                                    <h2 className="resume-section-title">Projects</h2>
-                                    {resumeData.projects.filter(p => p.name.trim() || p.details.trim()).map((proj, idx) => (
-                                        <div className="resume-item" key={proj.id} style={{ marginBottom: idx === resumeData.projects.length - 1 ? 0 : '16px' }}>
-                                            {proj.name.trim() && (
-                                                <div className="resume-item-header">
-                                                    <div className="resume-item-title">
-                                                        {proj.name}
-                                                        {proj.githubUrl && <a href={proj.githubUrl} target="_blank" rel="noreferrer" className="icon-link">🐙 Repo</a>}
-                                                        {proj.liveUrl && <a href={proj.liveUrl} target="_blank" rel="noreferrer" className="icon-link">🔗 Live</a>}
-                                                    </div>
-                                                </div>
-                                            )}
-                                            {proj.details.trim() && (
-                                                <div style={{ fontSize: '14px', whiteSpace: 'pre-wrap', marginTop: '4px', marginBottom: proj.techStack.length ? '8px' : '0' }}>
-                                                    {proj.details}
-                                                </div>
-                                            )}
-                                            {proj.techStack.length > 0 && (
-                                                <div>
-                                                    {proj.techStack.map(tech => (
-                                                        <span key={tech} className="tech-pill">{tech}</span>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
-                                </section>
-                            )}
-
-                            {/* Skills */}
-                            {(resumeData.skills.technical.length > 0 || resumeData.skills.soft.length > 0 || resumeData.skills.tools.length > 0) && (
-                                <section className="resume-section">
-                                    <h2 className="resume-section-title">Skills</h2>
-
-                                    {resumeData.skills.technical.length > 0 && (
-                                        <div style={{ marginBottom: '8px' }}>
-                                            <strong style={{ fontSize: '13px', display: 'block', marginBottom: '4px' }}>Technical</strong>
-                                            <div>
-                                                {resumeData.skills.technical.map(skill => (
-                                                    <span key={skill} className="skill-pill">{skill}</span>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-                                    {resumeData.skills.soft.length > 0 && (
-                                        <div style={{ marginBottom: '8px' }}>
-                                            <strong style={{ fontSize: '13px', display: 'block', marginBottom: '4px' }}>Soft Skills</strong>
-                                            <div>
-                                                {resumeData.skills.soft.map(skill => (
-                                                    <span key={skill} className="skill-pill">{skill}</span>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-                                    {resumeData.skills.tools.length > 0 && (
-                                        <div>
-                                            <strong style={{ fontSize: '13px', display: 'block', marginBottom: '4px' }}>Tools & Technologies</strong>
-                                            <div>
-                                                {resumeData.skills.tools.map(skill => (
-                                                    <span key={skill} className="skill-pill">{skill}</span>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-                                </section>
-                            )}
-
-                        </div>
+                    <div className="preview-shell" style={{ padding: selectedTemplate === 'modern' ? 0 : '40px' }}>
+                        <ResumePreview
+                            resumeData={resumeData}
+                            selectedTemplate={selectedTemplate}
+                            selectedColor={selectedColor}
+                        />
                     </div>
                 </aside>
 
