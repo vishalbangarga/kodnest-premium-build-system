@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import ResumePreview from "../components/ResumePreview";
+import ATSScoreDisplay from "../components/ATSScoreDisplay";
+import { calculateATSScore } from "../utils/scoreCalculator";
 
 function Builder() {
     // 1. STATE INITIALIZATION (Local Storage)
@@ -67,67 +69,11 @@ function Builder() {
         localStorage.setItem("resumeColor", selectedColor);
 
         // Calculate ATS Score
-        let score = 0;
-        let newSuggestions = [];
+        const { score, suggestions: newSuggestions } = calculateATSScore(resumeData);
 
-        // Summary: +15 if 40-120 words
-        const summaryWords = resumeData.summary.trim() ? resumeData.summary.trim().split(/\s+/).length : 0;
-        if (summaryWords >= 40 && summaryWords <= 120) {
-            score += 15;
-        } else {
-            newSuggestions.push("Expand summary to 40+ words.");
-        }
-
-        // Projects: +10 if >= 2 projects (with some text)
-        const validProjects = resumeData.projects.filter(p => p.name.trim() || p.details.trim());
-        if (validProjects.length >= 2) {
-            score += 10;
-        } else {
-            newSuggestions.push("Add at least 2 projects.");
-        }
-
-        // Experience: +10 if >= 1 entry
-        const validExp = resumeData.experience.filter(e => e.role.trim() || e.details.trim());
-        if (validExp.length >= 1) {
-            score += 10;
-        } else {
-            newSuggestions.push("Add experience or internship work.");
-        }
-
-        // Skills: +10 if >= 8 items
-        const totalSkills = resumeData.skills.technical.length + resumeData.skills.soft.length + resumeData.skills.tools.length;
-        if (totalSkills >= 8) {
-            score += 10;
-        } else {
-            newSuggestions.push("Expand skills list to 8+ items.");
-        }
-
-        // Links: +10 if github or linkedin exists
-        if (resumeData.links.github.trim() || resumeData.links.linkedin.trim()) {
-            score += 10;
-        } else {
-            newSuggestions.push("Add your GitHub or LinkedIn profile link.");
-        }
-
-        // Numbers in experience/projects: +15
-        const expProjText = [...resumeData.experience.map(e => e.details), ...resumeData.projects.map(p => p.details)].join(" ");
-        if (/\d|%|k\b|m\b/i.test(expProjText)) {
-            score += 15;
-        } else {
-            newSuggestions.push("Add measurable impact (numbers).");
-        }
-
-        // Education: +10 if complete
-        const validEdu = resumeData.education.filter(e => e.text.trim());
-        if (validEdu.length >= 1) {
-            score += 10;
-        } else {
-            newSuggestions.push("Add education details.");
-        }
-
-        setAtsScore(Math.min(100, score));
-        setSuggestions(newSuggestions.slice(0, 3)); // Max 3 suggestions
-    }, [resumeData, selectedTemplate]);
+        setAtsScore(score);
+        setSuggestions(newSuggestions);
+    }, [resumeData, selectedTemplate, selectedColor]);
 
     // Handlers
     const handlePersonalChange = (field, value) => {
@@ -589,49 +535,9 @@ function Builder() {
                 {/* Secondary Panel (Preview + Profile Score - Right) */}
                 <aside className="secondary-panel">
 
-                    {/* ATS Score Meter Component */}
-                    <div style={{
-                        backgroundColor: '#fff',
-                        borderRadius: '8px',
-                        padding: '24px',
-                        border: '1px solid rgba(17,17,17,0.1)',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.02)'
-                    }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-                            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 600, fontFamily: 'system-ui, sans-serif' }}>ATS Readiness Score</h3>
-                            <span style={{
-                                fontSize: '24px',
-                                fontWeight: 600,
-                                color: atsScore >= 80 ? '#4f6f52' : (atsScore >= 50 ? '#c58b2b' : '#8b0000'),
-                                fontFamily: 'Georgia, serif'
-                            }}>{atsScore}<span style={{ fontSize: '14px', color: '#666' }}>/100</span></span>
-                        </div>
-
-                        {/* Progress Bar */}
-                        <div style={{ width: '100%', height: '6px', backgroundColor: '#f0f0f0', borderRadius: '3px', overflow: 'hidden', marginBottom: '16px' }}>
-                            <div style={{
-                                height: '100%',
-                                width: `${atsScore}%`,
-                                backgroundColor: atsScore >= 80 ? '#4f6f52' : (atsScore >= 50 ? '#c58b2b' : '#8b0000'),
-                                transition: 'width 0.3s ease, background-color 0.3s ease'
-                            }}></div>
-                        </div>
-
-                        {/* Suggestions List */}
-                        {suggestions.length > 0 ? (
-                            <div>
-                                <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Top 3 Improvements</h4>
-                                <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '14px', color: '#333' }}>
-                                    {suggestions.map((s, i) => (
-                                        <li key={i} style={{ marginBottom: '4px' }}>{s}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        ) : (
-                            <div style={{ fontSize: '14px', color: '#4f6f52', fontWeight: 500 }}>
-                                ✓ Your resume looks great!
-                            </div>
-                        )}
+                    {/* ATS Score Component */}
+                    <div style={{ marginBottom: '24px' }}>
+                        <ATSScoreDisplay score={atsScore} suggestions={suggestions} />
                     </div>
 
                     {/* Customization Panel */}

@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import ResumePreview from "../components/ResumePreview";
+import ATSScoreDisplay from "../components/ATSScoreDisplay";
+import { calculateATSScore } from "../utils/scoreCalculator";
 
 function Preview() {
     // 1. STATE INITIALIZATION (Local Storage)
@@ -62,6 +64,9 @@ function Preview() {
     const hasValidProj = resumeData.projects.some(p => p.name.trim() || p.details.trim());
     const isMissingExpAndProj = !hasValidExp && !hasValidProj;
     const showWarning = isMissingName || isMissingExpAndProj;
+
+    // Calculate Latest Score
+    const { score, suggestions } = calculateATSScore(resumeData);
 
     // Export Handlers
     const handleDownloadPdf = () => {
@@ -187,6 +192,13 @@ function Preview() {
                     <button className="btn btn--primary" onClick={handleDownloadPdf}>
                         Download PDF
                     </button>
+                </div>
+            </div>
+
+            {/* Score Display Area (hidden on print) */}
+            <div className="print-hidden" style={{ maxWidth: '800px', margin: '0 auto 24px auto', display: 'flex', justifyContent: 'center' }}>
+                <div style={{ maxWidth: '400px', width: '100%' }}>
+                    <ATSScoreDisplay score={score} suggestions={suggestions} />
                 </div>
             </div>
 
